@@ -53,7 +53,7 @@ function normalizePath(base, file) {
 
   base = base || '';
 
-  var newPath = base + _relative;
+  var newPath = base + _relative.replace(/^\//, '');
 
   return newPath.replace(/\\/g, "/");
 }
@@ -127,7 +127,7 @@ function gPublish(options) {
           logSuccess(uploadOptions.destination);
           return done(null, file);
         }
-      });
+      })
     }
   });
 }
