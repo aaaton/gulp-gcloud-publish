@@ -120,13 +120,13 @@ function gPublish(options) {
         return done(null, file);
       });
     } else if (file.isBuffer()) {
-      stream.end(file.contents)
-      .on('error', function(e){
-        throw new PluginError(PLUGIN_NAME, "Error in gcloud connection.\nError message:\n" + JSON.stringify(e));
-      })
-      .on('finish', function() {
-        logSuccess(uploadOptions.destination);
-        return done(null, file);
+      stream.end(file.contents, function(err) {
+        if (err) {
+          throw new PluginError(PLUGIN_NAME, "Error in gcloud connection.\nError message:\n" + JSON.stringify(e));
+        } else {
+          logSuccess(uploadOptions.destination);
+          return done(null, file);
+        }
       });
     }
   });
