@@ -109,10 +109,9 @@ function gPublish(options) {
       public: !!options.public,
       resumable: !!options.resumable
     };
-
-    file.pipe(
-      bucket.file(uploadOptions.destination).createWriteStream(uploadOptions)
-    )
+    const stream = bucket.file(uploadOptions.destination).createWriteStream(uploadOptions)
+    if (file.isStream()) {
+      file.contents.pipe(stream)
       .on('error', function(e){
         throw new PluginError(PLUGIN_NAME, "Error in gcloud connection.\nError message:\n" + JSON.stringify(e));
       })
@@ -120,7 +119,16 @@ function gPublish(options) {
         logSuccess(uploadOptions.destination);
         return done(null, file);
       });
-
+    } else if (file.isBuffer()) {
+      stream.end(file.contents)
+      .on('error', function(e){
+        throw new PluginError(PLUGIN_NAME, "Error in gcloud connection.\nError message:\n" + JSON.stringify(e));
+      })
+      .on('finish', function() {
+        logSuccess(uploadOptions.destination);
+        return done(null, file);
+      });
+    }
   });
 }
 
